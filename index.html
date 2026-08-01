@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eram — Full-Stack Developer</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #000000; --bg2: #0a0a0a; --bg3: #111111;
+    --card: rgba(255,255,255,0.04); --card-hover: rgba(255,255,255,0.07);
+    --border: rgba(255,255,255,0.08); --border-light: rgba(255,255,255,0.12);
+    --text: #f5f5f7; --text2: #a1a1a6; --text3: #6e6e73;
+    --accent: #2997ff; --accent2: #30d158; --accent3: #ff375f;
+    --accent4: #ffd60a; --accent5: #bf5af2;
+    --px: clamp(1.5rem, 6vw, 6rem); --nav-h: 52px;
+    --radius: 18px; --radius-sm: 12px;
+  }
+  html { scroll-behavior: smooth; font-size: 16px; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #020408; color: var(--text); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 3px; }
+
+  /* 3D CANVAS */
+  #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+
+  /* NAV */
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: var(--nav-h); display: flex; justify-content: space-between; align-items: center; padding: 0 var(--px); background: rgba(0,0,0,0.72); backdrop-filter: saturate(180%) blur(20px); border-bottom: 1px solid var(--border); }
+  .nav-logo { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
+  .nav-logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a { color: var(--text2); text-decoration: none; font-size: 0.84rem; font-weight: 400; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta { background: var(--accent); color: #fff; border: none; padding: 7px 18px; border-radius: 980px; font-size: 0.82rem; font-weight: 500; font-family: 'Inter', sans-serif; cursor: pointer; text-decoration: none; transition: background 0.2s, transform 0.15s; }
+  .nav-cta:hover { background: #0077ed; transform: scale(1.03); }
+  .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
+  .hamburger span { display: block; width: 20px; height: 1.5px; background: var(--text); border-radius: 2px; }
+  .mobile-menu { display: none; position: fixed; top: var(--nav-h); left: 0; right: 0; z-index: 99; background: rgba(0,0,0,0.95); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); flex-direction: column; }
+  .mobile-menu.open { display: flex; }
+  .mobile-menu a { color: var(--text2); text-decoration: none; font-size: 0.95rem; padding: 1rem var(--px); border-bottom: 1px solid var(--border); transition: color 0.2s; }
+  .mobile-menu a:hover { color: var(--text); }
+
+  /* HERO */
+  .hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: calc(var(--nav-h) + 5rem) var(--px) 6rem; position: relative; overflow: hidden; z-index: 1; }
+  .hero-content { position: relative; z-index: 1; max-width: 800px; }
+  .hero-eyebrow { display: inline-flex; align-items: center; gap: 8px; background: rgba(41,151,255,0.1); border: 1px solid rgba(41,151,255,0.2); border-radius: 980px; padding: 5px 14px; font-size: 0.74rem; font-weight: 500; color: var(--accent); letter-spacing: 0.03em; margin-bottom: 2rem; }
+  .avail-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent2); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+  .hero h1 { font-size: clamp(2.8rem, 7vw, 6.5rem); font-weight: 800; line-height: 1.04; letter-spacing: -0.05em; margin-bottom: 1.5rem; }
+  .hero h1 .name-white { color: var(--text); }
+  .hero h1 .name-gradient { background: linear-gradient(135deg, var(--accent) 0%, var(--accent5) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-sub { font-size: clamp(0.95rem, 2vw, 1.2rem); font-weight: 400; color: var(--text2); line-height: 1.75; max-width: 540px; margin: 0 auto 2.75rem; letter-spacing: -0.01em; }
+  .hero-btns { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; margin-bottom: 4rem; }
+  .btn-apple { display: inline-flex; align-items: center; gap: 6px; padding: 13px 28px; border-radius: 980px; font-size: 0.92rem; font-weight: 500; font-family: 'Inter', sans-serif; text-decoration: none; cursor: pointer; border: none; transition: transform 0.2s, background 0.2s, box-shadow 0.2s; letter-spacing: -0.01em; }
+  .btn-apple:hover { transform: scale(1.03); }
+  .btn-apple.primary { background: var(--accent); color: #fff; }
+  .btn-apple.primary:hover { background: #0077ed; box-shadow: 0 8px 32px rgba(41,151,255,0.3); }
+  .btn-apple.ghost { background: rgba(255,255,255,0.08); color: var(--text); border: 1px solid var(--border-light); }
+  .btn-apple.ghost:hover { background: rgba(255,255,255,0.13); }
+  .hero-stats { display: flex; justify-content: center; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; max-width: 420px; margin: 0 auto; backdrop-filter: blur(10px); }
+  .hstat { flex: 1; padding: 1.25rem 1rem; text-align: center; border-right: 1px solid var(--border); }
+  .hstat:last-child { border-right: none; }
+  .hstat-num { font-size: 1.9rem; font-weight: 800; letter-spacing: -0.05em; }
+  .hstat-lbl { font-size: 0.7rem; color: var(--text3); margin-top: 2px; }
+
+  /* SECTIONS */
+  section { padding: 6rem var(--px); position: relative; z-index: 1; }
+  .section-eyebrow { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.6rem; }
+  .section-title { font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; letter-spacing: -0.04em; line-height: 1.1; margin-bottom: 0.75rem; }
+  .section-sub { color: var(--text2); font-size: 0.98rem; line-height: 1.7; max-width: 480px; margin-bottom: 3rem; }
+  .section-divider { border: none; border-top: 1px solid var(--border); position: relative; z-index: 1; }
+
+  /* FILTER */
+  .filter-tabs { display: inline-flex; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 980px; padding: 4px; margin-bottom: 2.5rem; flex-wrap: wrap; gap: 2px; }
+  .tab { padding: 7px 20px; border-radius: 980px; border: none; background: transparent; color: var(--text2); font-size: 0.82rem; font-weight: 500; font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.2s; }
+  .tab:hover { color: var(--text); }
+  .tab.active { background: rgba(255,255,255,0.12); color: var(--text); }
+
+  /* PROJECT GRID - 3D CARDS */
+  .project-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%,300px),1fr)); gap: 16px; }
+  .project-card {
+    background: rgba(10,10,10,0.85);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s, border-color 0.3s;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+    transform-style: preserve-3d;
+    cursor: pointer;
+  }
+  .project-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .project-card:hover {
+    transform: translateY(-8px) rotateX(3deg) rotateY(2deg) scale(1.02);
+    box-shadow: 0 24px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.18);
+  }
+  .project-card:hover::before { opacity: 1; }
+  .project-card.hidden { display: none; }
+  .card-thumb { height: 165px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+  .thumb-emoji { font-size: 3.5rem; position: relative; z-index: 1; filter: drop-shadow(0 4px 16px rgba(0,0,0,0.5)); transition: transform 0.3s; }
+  .project-card:hover .thumb-emoji { transform: scale(1.15) translateZ(20px); }
+  .thumb-glow { position: absolute; inset: 0; opacity: 0.35; transition: opacity 0.3s; }
+  .project-card:hover .thumb-glow { opacity: 0.6; }
+  .card-stripe { position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+  .card-body { padding: 1.25rem; border-top: 1px solid var(--border); }
+  .card-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 0.6rem; }
+  .tag { font-size: 0.63rem; font-weight: 600; padding: 3px 8px; border-radius: 980px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .tag-website { background: rgba(41,151,255,0.12); color: #2997ff; }
+  .tag-game    { background: rgba(255,55,95,0.12);   color: #ff375f; }
+  .tag-app     { background: rgba(48,209,88,0.12);   color: #30d158; }
+  .tag-tech    { background: rgba(255,255,255,0.06); color: var(--text3); }
+  .card-title { font-size: 0.95rem; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 5px; }
+  .card-desc { font-size: 0.8rem; color: var(--text2); line-height: 1.55; margin-bottom: 1rem; }
+  .card-footer { display: flex; gap: 6px; flex-wrap: wrap; }
+  .card-btn { font-size: 0.75rem; padding: 6px 14px; border-radius: 980px; border: 1px solid var(--border-light); background: transparent; color: var(--text2); cursor: pointer; text-decoration: none; font-family: 'Inter', sans-serif; font-weight: 500; transition: all 0.2s; display: inline-flex; align-items: center; gap: 4px; }
+  .card-btn:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+  .card-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .card-btn.primary:hover { background: #0077ed; }
+  .demo-btn { background: rgba(255,214,10,0.1) !important; border-color: rgba(255,214,10,0.25) !important; color: var(--accent4) !important; }
+  .demo-btn:hover { background: rgba(255,214,10,0.2) !important; }
+
+  /* 3D SKILLS */
+  .skills-section { background: rgba(10,10,10,0.6); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); backdrop-filter: blur(5px); }
+  .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%,190px),1fr)); gap: 12px; }
+  .skill-card {
+    background: rgba(10,10,10,0.8);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 1.5rem;
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s, border-color 0.3s;
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+  }
+  .skill-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(41,151,255,0.05) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  .skill-card:hover { transform: translateY(-6px) rotateX(5deg); box-shadow: 0 16px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.15); }
+  .skill-card:hover::after { opacity: 1; }
+  .skill-icon { font-size: 1.75rem; margin-bottom: 0.75rem; transition: transform 0.3s; }
+  .skill-card:hover .skill-icon { transform: scale(1.2) rotate(-5deg); }
+  .skill-name { font-size: 0.9rem; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 2px; }
+  .skill-level { font-size: 0.7rem; color: var(--text3); margin-bottom: 0.85rem; }
+  .skill-bar { height: 3px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
+  .skill-fill { height: 100%; border-radius: 2px; transition: width 1s cubic-bezier(0.34,1.56,0.64,1); width: 0; }
+  .skill-fill.animated { }
+
+  /* CONTACT */
+  .contact-section { background: transparent; }
+  .contact-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: start; }
+  .contact-left .section-title { margin-bottom: 1rem; }
+  .contact-left p { color: var(--text2); font-size: 0.95rem; line-height: 1.7; margin-bottom: 2rem; }
+  .contact-info { display: flex; flex-direction: column; gap: 0.75rem; }
+  .contact-item { display: flex; align-items: center; gap: 0.75rem; font-size: 0.88rem; color: var(--text2); }
+  .contact-icon { width: 36px; height: 36px; border-radius: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+  .contact-form-wrap { background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; backdrop-filter: blur(16px); }
+  .form-group { margin-bottom: 1rem; }
+  .form-group label { display: block; font-size: 0.7rem; font-weight: 600; color: var(--text3); margin-bottom: 6px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .form-group input, .form-group textarea { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 11px 14px; color: var(--text); font-size: 0.9rem; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s, background 0.2s; resize: none; }
+  .form-group input:focus, .form-group textarea:focus { border-color: var(--accent); background: rgba(41,151,255,0.04); }
+  .form-group input::placeholder, .form-group textarea::placeholder { color: var(--text3); }
+  .form-submit { width: 100%; padding: 13px; border-radius: 980px; background: var(--accent); border: none; color: #fff; font-size: 0.92rem; font-family: 'Inter', sans-serif; font-weight: 600; cursor: pointer; transition: background 0.2s, transform 0.15s; letter-spacing: -0.01em; margin-top: 0.25rem; }
+  .form-submit:hover { background: #0077ed; transform: scale(1.01); }
+  .form-success { display: none; text-align: center; padding: 2.5rem 1rem; }
+  .form-success-icon { font-size: 3rem; margin-bottom: 0.75rem; }
+  .form-success-title { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 0.5rem; }
+  .form-success-sub { font-size: 0.85rem; color: var(--text2); line-height: 1.6; }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; z-index: 999; background: rgba(0,0,0,0.85); backdrop-filter: blur(20px); align-items: center; justify-content: center; padding: 1rem; }
+  .modal-overlay.open { display: flex; }
+  .modal-box { background: #111; border: 1px solid var(--border-light); border-radius: 20px; overflow: hidden; width: 100%; max-width: 840px; box-shadow: 0 40px 100px rgba(0,0,0,0.8); animation: modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+  @keyframes modalIn { from{opacity:0;transform:scale(0.93)} to{opacity:1;transform:scale(1)} }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); }
+  .modal-title { font-size: 0.9rem; font-weight: 600; letter-spacing: -0.02em; }
+  .modal-close { width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.1); border: none; color: var(--text2); font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+  .modal-close:hover { background: rgba(255,55,95,0.25); color: var(--accent3); }
+  .modal-video { position: relative; width: 100%; padding-bottom: 56.25%; background: #000; }
+  .modal-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
+  #fallbackMsg { min-height: 260px; background: #111; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 3rem 2rem; gap: 1rem; text-align: center; }
+
+  /* FOOTER */
+  footer { padding: 1.75rem var(--px); border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; position: relative; z-index: 1; }
+  .footer-copy { font-size: 0.75rem; color: var(--text3); }
+  .social-links { display: flex; gap: 1.5rem; }
+  .social-link { color: var(--text3); text-decoration: none; font-size: 0.75rem; transition: color 0.2s; }
+  .social-link:hover { color: var(--text); }
+
+  /* SCROLL REVEAL */
+  .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.34,1.56,0.64,1); }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* FLOATING 3D BADGE */
+  .floating-badge {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 50;
+    background: rgba(10,10,10,0.9);
+    border: 1px solid var(--border-light);
+    border-radius: 14px;
+    padding: 10px 16px;
+    font-size: 0.72rem;
+    color: var(--text3);
+    backdrop-filter: blur(20px);
+    animation: floatBadge 3s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes floatBadge {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .nav-links, .nav-cta { display: none; }
+    .hamburger { display: flex; }
+    section { padding: 4rem var(--px); }
+    .hero { min-height: auto; padding-top: calc(var(--nav-h) + 3rem); padding-bottom: 4rem; }
+    .contact-wrap { grid-template-columns: 1fr; gap: 2.5rem; }
+    .project-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) {
+    .skills-grid { grid-template-columns: repeat(2,1fr); }
+    .hero-stats { max-width: 100%; }
+    .hero h1 { font-size: 2.4rem; }
+    .floating-badge { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .project-card, .skill-card { transition: none; }
+    .reveal { opacity: 1; transform: none; transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Eram<span>.</span>dev</div>
+  <ul class="nav-links">
+    <li><a href="#work">Work</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="#contact" class="nav-cta">Hire Me</a>
+  <div class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#work" onclick="closeMenu()">Work</a>
+  <a href="#skills" onclick="closeMenu()">Skills</a>
+  <a href="#contact" onclick="closeMenu()">Contact</a>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-content">
+    <div class="hero-eyebrow reveal"><span class="avail-dot"></span> Available for freelance & full-time</div>
+    <h1 class="reveal">
+      <span class="name-white">Hi, I'm<br></span>
+      <span class="name-gradient">Mamnun Mumin Eram</span>
+    </h1>
+    <p class="hero-sub reveal">Full-Stack Developer who builds beautiful websites, powerful web apps, and fun games — crafting digital experiences people love to use.</p>
+    <div class="hero-btns reveal">
+      <a href="#work" class="btn-apple primary">View My Work</a>
+      <a href="#contact" class="btn-apple ghost">Get in Touch</a>
+    </div>
+    <div class="hero-stats reveal">
+      <div class="hstat"><div class="hstat-num">20+</div><div class="hstat-lbl">Projects</div></div>
+      <div class="hstat"><div class="hstat-num">5+</div><div class="hstat-lbl">Years Exp</div></div>
+      <div class="hstat"><div class="hstat-num">10+</div><div class="hstat-lbl">Clients</div></div>
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- WORK -->
+<section id="work">
+  <div class="section-eyebrow reveal">Portfolio</div>
+  <div class="section-title reveal">Things I've Built</div>
+  <p class="section-sub reveal">A mix of websites, apps, and games — all crafted with care and a lot of coffee.</p>
+  <div class="filter-tabs reveal">
+    <button class="tab active" onclick="filterProjects('all',this)">All</button>
+    <button class="tab" onclick="filterProjects('website',this)">Websites</button>
+    <button class="tab" onclick="filterProjects('app',this)">Apps</button>
+    <button class="tab" onclick="filterProjects('game',this)">Games</button>
+  </div>
+  <div class="project-grid" id="projects">
+
+    <div class="project-card reveal" data-type="website">
+      <div class="card-thumb" style="background:linear-gradient(135deg,#001219,#005f73);">
+        <div class="thumb-glow" style="background:radial-gradient(circle at 50% 50%,rgba(41,151,255,0.4),transparent 70%)"></div>
+        <div class="thumb-emoji">🏨</div>
+        <div class="card-stripe" style="background:linear-gradient(90deg,#2997ff,#30d158)"></div>
+      </div>
+      <div class="card-body">
+        <div class="card-tags"><span class="tag tag-website">Website</span><span class="tag tag-tech">HTML/CSS</span><span class="tag tag-tech">JavaScript</span></div>
+        <div class="card-title">Hotel Management System</div>
+        <div class="card-desc">A full-featured hotel management website with room booking, guest management, and a clean admin interface.</div>
+        <div class="card-footer">
+          <a href="https://github.com/Eram85/My-website-project" target="_blank" class="card-btn primary">GitHub</a>
+          <button class="card-btn demo-btn" onclick="openVideo('FRFyDImt99I','Hotel Management System')">▶ Demo</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="project-card reveal" data-type="app">
+      <div class="card-thumb" style="background:linear-gradient(135deg,#1a1000,#3d2800);">
+        <div class="thumb-glow" style="background:radial-gradient(circle at 50% 50%,rgba(255,214,10,0.3),transparent 70%)"></div>
+        <div class="thumb-emoji">⚡</div>
+        <div class="card-stripe" style="background:linear-gradient(90deg,#ffd60a,#ff9f0a)"></div>
+      </div>
+      <div class="card-body">
+        <div class="card-tags"><span class="tag tag-app">App</span><span class="tag tag-tech">JavaScript</span><span class="tag tag-tech">localStorage</span></div>
+        <div class="card-title">TypeRush — Typing Speed Test</div>
+        <div class="card-desc">WPM tracker with accuracy stats, 3 word modes, multiple time limits and personal best history.</div>
+        <div class="card-footer">
+          <a href="typing-test.html" target="_blank" class="card-btn primary">Open App</a>
+          <a href="https://github.com/Eram85/Apps-/tree/main/typing%20speed%20app" target="_blank" class="card-btn">GitHub</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="project-card reveal" data-type="app">
+      <div class="card-thumb" style="background:linear-gradient(135deg,#001d3d,#003566);">
+        <div class="thumb-glow" style="background:radial-gradient(circle at 50% 50%,rgba(48,209,88,0.3),transparent 70%)"></div>
+        <div class="thumb-emoji">🎨</div>
+        <div class="card-stripe" style="background:linear-gradient(90deg,#30d158,#2997ff)"></div>
+      </div>
+      <div class="card-body">
+        <div class="card-tags"><span class="tag tag-app">App</span><span class="tag tag-tech">JavaScript</span><span class="tag tag-tech">Canvas API</span></div>
+        <div class="card-title">PaletteSnap — Color Extractor</div>
+        <div class="card-desc">Upload any image and extract its color palette using K-Means. Copy HEX/RGB/HSL, get CSS variables & export PNG.</div>
+        <div class="card-footer">
+          <a href="color-palette.html" target="_blank" class="card-btn primary">Open App</a>
+          <a href="https://github.com/Eram85/Apps-/tree/main/colour-palette" target="_blank" class="card-btn">GitHub</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="project-card reveal" data-type="app">
+      <div class="card-thumb" style="background:linear-gradient(135deg,#0a1628,#0d2a4a);">
+        <div class="thumb-glow" style="background:radial-gradient(circle at 50% 50%,rgba(41,151,255,0.3),transparent 70%)"></div>
+        <div class="thumb-emoji">🌤️</div>
+        <div class="card-stripe" style="background:linear-gradient(90deg,#2997ff,#64d2ff)"></div>
+      </div>
+      <div class="card-body">
+        <div class="card-tags"><span class="tag tag-app">App</span><span class="tag tag-tech">JavaScript</span><span class="tag tag-tech">Open-Meteo API</span></div>
+        <div class="card-title">WeatherNow — Weather App</div>
+        <div class="card-desc">Real-time weather with city search, GPS location, 5-day forecast, humidity, wind & sunrise/sunset data.</div>
+        <div class="card-footer">
+          <a href="weather-app.html" target="_blank" class="card-btn primary">Open App</a>
+          <a href="https://github.com/Eram85/Apps-/tree/main/weather%20app" target="_blank" class="card-btn">GitHub</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="project-card reveal" data-type="app">
+      <div class="card-thumb" style="background:linear-gradient(135deg,#1a0500,#3d1000);">
+        <div class="thumb-glow" style="background:radial-gradient(circle at 50% 50%,rgba(255,55,95,0.25),transparent 70%)"></div>
+        <div class="thumb-emoji">💰</div>
+        <div class="card-stripe" style="background:linear-gradient(90deg,#ff375f,#ff9f0a)"></div>
+      </div>
+      <div class="card-body">
+        <div class="card-tags"><span class="tag tag-app">App</span><span class="tag tag-tech">JavaScript</span><span class="tag tag-tech">localStorage</span></div>
+        <div class="card-title">SpendSmart — Expense Tracker</div>
+        <div class="card-desc">Smart expense tracker with income/expense logging, category charts, balance summary and CSV export.</div>
+        <div class="card-footer">
+          <a href="expense-tracker.html" target="_blank" class="card-btn primary">Open App</a>
+          <a href="https://github.com/Eram85/Apps-/tree/main/expence%20tracker" target="_blank" class="card-btn">GitHub</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="project-card reveal" data-type="game">
+      <div class="card-thumb" style="background:linear-gradient(135deg,#0a0a2e,#1a0a3d);">
+        <div class="thumb-glow" style="background:radial-gradient(circle at 50% 50%,rgba(191,90,242,0.3),transparent 70%)"></div>
+        <div class="thumb-emoji">🫧</div>
+        <div class="card-stripe" style="background:linear-gradient(90deg,#bf5af2,#2997ff)"></div>
+      </div>
+      <div class="card-body">
+        <div class="card-tags"><span class="tag tag-game">Game</span><span class="tag tag-tech">JavaScript</span><span class="tag tag-tech">Canvas</span></div>
+        <div class="card-title">Bubble Shooter</div>
+        <div class="card-desc">Aim, shoot and pop matching colored bubbles to clear the board. Built from scratch with pure JavaScript.</div>
+        <div class="card-footer">
+          <a href="https://github.com/Eram85/Games/tree/main/bubbleshooter" target="_blank" class="card-btn primary">GitHub</a>
+          <button class="card-btn demo-btn" onclick="openVideo('Yq-1w3UqhtY','Bubble Shooter')">▶ Demo</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="project-card reveal" data-type="game">
+      <div class="card-thumb" style="background:linear-gradient(135deg,#0a1a0a,#0d2e10);">
+        <div class="thumb-glow" style="background:radial-gradient(circle at 50% 50%,rgba(48,209,88,0.25),transparent 70%)"></div>
+        <div class="thumb-emoji">⛳</div>
+        <div class="card-stripe" style="background:linear-gradient(90deg,#30d158,#ffd60a)"></div>
+      </div>
+      <div class="card-body">
+        <div class="card-tags"><span class="tag tag-game">Game</span><span class="tag tag-tech">JavaScript</span><span class="tag tag-tech">Physics</span></div>
+        <div class="card-title">Mini Golf</div>
+        <div class="card-desc">Browser-based mini golf with physics-driven ball movement, obstacles, and multiple holes to beat.</div>
+        <div class="card-footer">
+          <a href="https://github.com/Eram85/Games/tree/main/minigolf" target="_blank" class="card-btn primary">GitHub</a>
+          <button class="card-btn demo-btn" onclick="openVideo('sZHA0hxcRAU','Mini Golf')">▶ Demo</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="project-card reveal" data-type="game">
+      <div class="card-thumb" style="background:linear-gradient(135deg,#1a1200,#2e2000);">
+        <div class="thumb-glow" style="background:radial-gradient(circle at 50% 50%,rgba(255,214,10,0.25),transparent 70%)"></div>
+        <div class="thumb-emoji">🟩</div>
+        <div class="card-stripe" style="background:linear-gradient(90deg,#ffd60a,#30d158)"></div>
+      </div>
+      <div class="card-body">
+        <div class="card-tags"><span class="tag tag-game">Game</span><span class="tag tag-tech">JavaScript</span><span class="tag tag-tech">HTML/CSS</span></div>
+        <div class="card-title">Mini Wordle</div>
+        <div class="card-desc">Guess the hidden word in 6 tries. Green, yellow, and grey tiles guide your way to the answer.</div>
+        <div class="card-footer">
+          <a href="https://github.com/Eram85/Games/tree/main/miniwordle" target="_blank" class="card-btn primary">GitHub</a>
+          <button class="card-btn demo-btn" onclick="openVideo('Jqo5DDAzFZ8','Mini Wordle')">▶ Demo</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="project-card reveal" data-type="game">
+      <div class="card-thumb" style="background:linear-gradient(135deg,#0a0010,#1a0030);">
+        <div class="thumb-glow" style="background:radial-gradient(circle at 50% 50%,rgba(255,55,95,0.25),transparent 70%)"></div>
+        <div class="thumb-emoji">🚀</div>
+        <div class="card-stripe" style="background:linear-gradient(90deg,#ff375f,#ff9f0a)"></div>
+      </div>
+      <div class="card-body">
+        <div class="card-tags"><span class="tag tag-game">Game</span><span class="tag tag-tech">JavaScript</span><span class="tag tag-tech">Canvas</span></div>
+        <div class="card-title">Space Shooter</div>
+        <div class="card-desc">Arcade-style space shooter — blast through waves of enemies, dodge obstacles, and rack up the high score.</div>
+        <div class="card-footer">
+          <a href="https://github.com/Eram85/Games/tree/main/spaceshooter" target="_blank" class="card-btn primary">GitHub</a>
+          <button class="card-btn demo-btn" onclick="openVideo('Uoo4Lt_wDQo','Space Shooter')">▶ Demo</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- SKILLS -->
+<section id="skills" class="skills-section">
+  <div class="section-eyebrow reveal">Toolkit</div>
+  <div class="section-title reveal">What I Work With</div>
+  <p class="section-sub reveal">Years of experience across the full stack — from polished UIs to robust backends.</p>
+  <div class="skills-grid">
+    <div class="skill-card reveal"><div class="skill-icon">⚛️</div><div class="skill-name">React / Next.js</div><div class="skill-level">Expert · 4 years</div><div class="skill-bar"><div class="skill-fill" data-width="92" style="background:linear-gradient(90deg,#2997ff,#bf5af2)"></div></div></div>
+    <div class="skill-card reveal"><div class="skill-icon">🟩</div><div class="skill-name">Node.js</div><div class="skill-level">Expert · 4 years</div><div class="skill-bar"><div class="skill-fill" data-width="88" style="background:linear-gradient(90deg,#30d158,#2997ff)"></div></div></div>
+    <div class="skill-card reveal"><div class="skill-icon">🎨</div><div class="skill-name">HTML / CSS</div><div class="skill-level">Expert · 5 years</div><div class="skill-bar"><div class="skill-fill" data-width="95" style="background:linear-gradient(90deg,#ff375f,#ff9f0a)"></div></div></div>
+    <div class="skill-card reveal"><div class="skill-icon">🎮</div><div class="skill-name">JavaScript / Canvas</div><div class="skill-level">Advanced · 3 years</div><div class="skill-bar"><div class="skill-fill" data-width="85" style="background:linear-gradient(90deg,#ffd60a,#ff9f0a)"></div></div></div>
+    <div class="skill-card reveal"><div class="skill-icon">🗄️</div><div class="skill-name">SQL / PostgreSQL</div><div class="skill-level">Advanced · 3 years</div><div class="skill-bar"><div class="skill-fill" data-width="82" style="background:linear-gradient(90deg,#2997ff,#30d158)"></div></div></div>
+    <div class="skill-card reveal"><div class="skill-icon">☁️</div><div class="skill-name">AWS / Firebase</div><div class="skill-level">Intermediate · 2 years</div><div class="skill-bar"><div class="skill-fill" data-width="68" style="background:linear-gradient(90deg,#ffd60a,#30d158)"></div></div></div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- CONTACT -->
+<section id="contact" class="contact-section">
+  <div class="contact-wrap">
+    <div class="contact-left">
+      <div class="section-eyebrow reveal">Contact</div>
+      <div class="section-title reveal">Let's build something great.</div>
+      <p class="reveal">Have a project in mind? Want to collaborate? Or just want to say hi — I'd love to hear from you.</p>
+      <div class="contact-info">
+        <div class="contact-item reveal"><div class="contact-icon">📍</div> Sylhet, Bangladesh</div>
+        <div class="contact-item reveal"><div class="contact-icon">💼</div> Open to freelance & full-time</div>
+        <div class="contact-item reveal"><div class="contact-icon">⚡</div> Usually replies within 24 hours</div>
+        <div class="contact-item reveal"><div class="contact-icon">🐙</div><a href="https://github.com/Eram85" target="_blank" style="color:var(--accent);text-decoration:none">github.com/Eram85</a></div>
+      </div>
+    </div>
+    <div class="reveal">
+      <div class="contact-form-wrap">
+        <div id="contactFormInner">
+          <div class="form-group"><label>Name</label><input type="text" id="fname" placeholder="Your name"></div>
+          <div class="form-group"><label>Email</label><input type="email" id="femail" placeholder="your@email.com"></div>
+          <div class="form-group"><label>Message</label><textarea id="fmsg" rows="4" placeholder="Tell me about your project..."></textarea></div>
+          <button class="form-submit" onclick="submitForm(this)">Send Message →</button>
+        </div>
+        <div class="form-success" id="formSuccess">
+          <div class="form-success-icon">✅</div>
+          <div class="form-success-title">Message sent!</div>
+          <div class="form-success-sub">Thanks for reaching out. I'll get back to you within 24 hours.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VIDEO MODAL -->
+<div class="modal-overlay" id="videoModal" onclick="handleOverlayClick(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Demo</div>
+      <button class="modal-close" onclick="closeVideo()">✕</button>
+    </div>
+    <div class="modal-video" id="embedWrapper">
+      <iframe id="modalIframe" src="" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+    </div>
+    <div id="fallbackMsg">
+      <div style="font-size:2.5rem">🎬</div>
+      <div style="font-size:1rem;font-weight:600;margin-bottom:0.5rem;letter-spacing:-0.02em">Can't embed here</div>
+      <div style="color:var(--text2);font-size:0.85rem;max-width:320px;line-height:1.6;margin-bottom:1.25rem">YouTube blocks embedding on local files. Once your site is hosted it will play directly here.</div>
+      <a id="modalYTLink" href="#" target="_blank" class="btn-apple primary" style="font-size:0.88rem;padding:10px 22px">▶ Watch on YouTube</a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-copy">© 2026 Eram.dev — Designed & Built by Mamnun Mumin Eram</div>
+  <div class="social-links">
+    <a href="https://github.com/Eram85" target="_blank" class="social-link">GitHub</a>
+    <a href="https://www.instagram.com/_eram.30.236_/" target="_blank" class="social-link">Instagram</a>
+    <a href="https://www.facebook.com/erammamnun.eram" target="_blank" class="social-link">Facebook</a>
+    <a href="#" class="social-link">LinkedIn</a>
+  </div>
+</footer>
+
+<script>
+// ─── CANVAS 2D SPACE BACKGROUND ───────────────────────────────────────────
+(function() {
+  const canvas = document.getElementById('bg-canvas');
+
+  const ctx = canvas.getContext('2d');
+  let W = canvas.width  = window.innerWidth;
+  let H = canvas.height = window.innerHeight;
+
+  window.addEventListener('resize', () => {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    buildNebulae();
+  });
+
+  // ── MOUSE PARALLAX ──────────────────────────────────────────────────────
+  let mx = 0, my = 0, tmx = 0, tmy = 0;
+  document.addEventListener('mousemove', e => {
+    tmx = (e.clientX / window.innerWidth  - 0.5);
+    tmy = (e.clientY / window.innerHeight - 0.5);
+  });
+
+  // ── STARS ────────────────────────────────────────────────────────────────
+  const STAR_COLORS = ['#ffffff','#cce0ff','#ffe8c0','#aad4ff','#ffd0a0','#e8ccff'];
+  const stars = [];
+  for (let i = 0; i < 2200; i++) {
+    const r = Math.random();
+    const size = r < 0.6 ? Math.random()*0.8+0.3   // small dim
+               : r < 0.9 ? Math.random()*1.2+0.8   // medium
+                         : Math.random()*2.0+1.5;   // bright big
+    stars.push({
+      x: Math.random() * 3000 - 500,
+      y: Math.random() * 2500 - 400,
+      size,
+      color: STAR_COLORS[Math.floor(Math.random()*STAR_COLORS.length)],
+      twinkleSpeed: Math.random()*0.04+0.01,
+      twinklePhase: Math.random()*Math.PI*2,
+      layer: r < 0.6 ? 0.2 : r < 0.9 ? 0.55 : 1.0,  // parallax depth
+    });
+  }
+
+  // ── NEBULAE (pre-drawn onto offscreen canvases) ───────────────────────────
+  let nebulae = [];
+  function buildNebulae() {
+    nebulae = [
+      makeNebula(W*0.15, H*0.25, W*0.55, H*0.60, 60,120,255, 0.22),  // blue top-left
+      makeNebula(W*0.75, H*0.10, W*0.50, H*0.55, 140,50,220, 0.20),  // purple top-right
+      makeNebula(W*0.50, H*0.70, W*0.60, H*0.50, 20,160,220, 0.18),  // cyan bottom-mid
+      makeNebula(W*0.85, H*0.60, W*0.45, H*0.45, 200,50,120, 0.16),  // magenta right
+      makeNebula(W*0.05, H*0.75, W*0.40, H*0.40,  50,200,140, 0.15), // teal bottom-left
+    ];
+  }
+
+  function makeNebula(cx, cy, rw, rh, r, g, b, peak) {
+    // Return descriptor — we'll draw directly each frame for parallax
+    return { cx, cy, rw, rh, r, g, b, peak,
+      layer: Math.random()*0.15 + 0.05,
+    };
+  }
+
+  buildNebulae();
+
+  // ── PLANETS ──────────────────────────────────────────────────────────────
+  const planets = [
+    { bx:0.82, by:0.18, r:38, cr:'#5588ff', gr:'#2244cc', glowR:3.5, ring:false, angle:0, speed:0.0003 },
+    { bx:0.12, by:0.55, r:28, cr:'#bb55ff', gr:'#7722cc', glowR:3.2, ring:true,  angle:1.2, speed:-0.0002 },
+    { bx:0.65, by:0.78, r:20, cr:'#33ddff', gr:'#1199bb', glowR:3.0, ring:false, angle:0.5, speed:0.0004 },
+    { bx:0.35, by:0.15, r:15, cr:'#ff7755', gr:'#cc3322', glowR:2.8, ring:false, angle:2.1, speed:0.0005 },
+  ];
+
+  // ── SHOOTING STARS ────────────────────────────────────────────────────────
+  let shoots = [];
+  let shootTimer = 0;
+  function spawnShoot() {
+    shoots.push({
+      x: Math.random() * W * 1.3 + W*0.1,
+      y: Math.random() * H * 0.5 - 50,
+      vx: -(Math.random()*8+6),
+      vy:   Math.random()*4+2,
+      len: Math.random()*120+60,
+      life: 0,
+      maxLife: Math.random()*40+30,
+    });
+  }
+
+  // ── DRAW HELPERS ─────────────────────────────────────────────────────────
+  function drawNebula(n, ox, oy) {
+    const cx = n.cx + ox * n.layer * 200;
+    const cy = n.cy + oy * n.layer * 120;
+    // 4 overlapping blobs
+    const blobs = [
+      {fx:0,    fy:0,    fr:1.0, fa:n.peak},
+      {fx:-0.2, fy:-0.15,fr:0.65,fa:n.peak*0.7},
+      {fx: 0.2, fy: 0.12,fr:0.55,fa:n.peak*0.6},
+      {fx:-0.05,fy: 0.2, fr:0.5, fa:n.peak*0.5},
+    ];
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    blobs.forEach(b => {
+      const bx = cx + b.fx * n.rw * 0.5;
+      const by = cy + b.fy * n.rh * 0.5;
+      const rx = n.rw * b.fr * 0.5;
+      const ry = n.rh * b.fr * 0.5;
+      const grd = ctx.createRadialGradient(bx, by, 0, bx, by, Math.max(rx, ry));
+      grd.addColorStop(0,   `rgba(${n.r},${n.g},${n.b},${b.fa})`);
+      grd.addColorStop(0.4, `rgba(${n.r},${n.g},${n.b},${b.fa*0.35})`);
+      grd.addColorStop(1,   `rgba(${n.r},${n.g},${n.b},0)`);
+      ctx.save();
+      ctx.scale(rx / Math.max(rx,ry), ry / Math.max(rx,ry));
+      ctx.fillStyle = grd;
+      ctx.fillRect((bx - rx) * Math.max(rx,ry)/rx, (by - ry) * Math.max(rx,ry)/ry, rx*2 * Math.max(rx,ry)/rx, ry*2 * Math.max(rx,ry)/ry);
+      ctx.restore();
+    });
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.restore();
+  }
+
+  function drawPlanet(p, ox, oy, t) {
+    const x = p.bx * W + ox * 25;
+    const y = p.by * H + oy * 15;
+    p.angle += p.speed;
+
+    // Outer glow rings
+    for (let ring = 4; ring >= 1; ring--) {
+      const grd = ctx.createRadialGradient(x, y, p.r*0.5, x, y, p.r * p.glowR * ring * 0.55);
+      grd.addColorStop(0, p.cr + '22');
+      grd.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.beginPath();
+      ctx.arc(x, y, p.r * p.glowR * ring * 0.55, 0, Math.PI*2);
+      ctx.fillStyle = grd;
+      ctx.fill();
+    }
+
+    // Planet body gradient
+    const grad = ctx.createRadialGradient(x - p.r*0.3, y - p.r*0.3, 0, x, y, p.r);
+    grad.addColorStop(0, '#ffffff');
+    grad.addColorStop(0.25, p.cr);
+    grad.addColorStop(1, p.gr);
+    ctx.beginPath();
+    ctx.arc(x, y, p.r, 0, Math.PI*2);
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // Ring system
+    if (p.ring) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(0.4);
+      ctx.scale(1, 0.28);
+      ctx.strokeStyle = p.cr + '55';
+      ctx.lineWidth = p.r * 0.22;
+      ctx.beginPath();
+      ctx.arc(0, 0, p.r * 2.1, 0, Math.PI*2);
+      ctx.stroke();
+      ctx.strokeStyle = p.cr + '33';
+      ctx.lineWidth = p.r * 0.12;
+      ctx.beginPath();
+      ctx.arc(0, 0, p.r * 2.6, 0, Math.PI*2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Tiny moons
+    const moonX = x + Math.cos(p.angle * 3) * p.r * 2.8;
+    const moonY = y + Math.sin(p.angle * 3) * p.r * 0.7;
+    ctx.beginPath();
+    ctx.arc(moonX, moonY, p.r * 0.18, 0, Math.PI*2);
+    ctx.fillStyle = '#ccddff';
+    ctx.fill();
+  }
+
+  function drawStar(s, ox, oy, t) {
+    const px = s.x + ox * s.layer * 35;
+    const py = s.y + oy * s.layer * 20;
+    const twinkle = 0.5 + 0.5 * Math.sin(t * s.twinkleSpeed + s.twinklePhase);
+    const alpha = s.size > 1.5 ? 0.6 + twinkle * 0.4 : 0.55 + twinkle * 0.2;
+    const radius = s.size * (s.size > 1.5 ? 0.9 + twinkle * 0.25 : 1.0);
+
+    if (s.size > 1.5) {
+      // Bright star: glow + cross-flare
+      const grd = ctx.createRadialGradient(px, py, 0, px, py, radius*4);
+      grd.addColorStop(0, s.color);
+      grd.addColorStop(0.3, s.color + '88');
+      grd.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.globalAlpha = alpha * 0.4;
+      ctx.beginPath();
+      ctx.arc(px, py, radius*4, 0, Math.PI*2);
+      ctx.fillStyle = grd;
+      ctx.fill();
+
+      // Cross flare
+      if (s.size > 2.0) {
+        ctx.globalAlpha = alpha * 0.25;
+        ctx.strokeStyle = s.color;
+        ctx.lineWidth = 0.6;
+        const fl = radius * 6 * (0.7 + twinkle * 0.5);
+        ctx.beginPath(); ctx.moveTo(px-fl,py); ctx.lineTo(px+fl,py); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(px,py-fl); ctx.lineTo(px,py+fl); ctx.stroke();
+      }
+    }
+
+    ctx.globalAlpha = alpha;
+    ctx.beginPath();
+    ctx.arc(px, py, radius, 0, Math.PI*2);
+    ctx.fillStyle = s.color;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+
+  function drawShoot(s) {
+    const prog = s.life / s.maxLife;
+    const alpha = prog < 0.2 ? prog/0.2 : 1 - (prog-0.2)/0.8;
+    const tx = s.x + s.vx * (s.maxLife - s.life);
+    const ty = s.y + s.vy * (s.maxLife - s.life);
+    const tailX = tx - s.vx * s.len * 0.18;
+    const tailY = ty - s.vy * s.len * 0.18;
+    const grad = ctx.createLinearGradient(tx, ty, tailX, tailY);
+    grad.addColorStop(0, `rgba(255,255,255,${alpha})`);
+    grad.addColorStop(0.3, `rgba(180,210,255,${alpha*0.6})`);
+    grad.addColorStop(1, 'rgba(100,150,255,0)');
+    ctx.save();
+    ctx.lineWidth = 1.8;
+    ctx.strokeStyle = grad;
+    ctx.shadowColor = '#aaccff';
+    ctx.shadowBlur = 6;
+    ctx.beginPath();
+    ctx.moveTo(tx, ty);
+    ctx.lineTo(tailX, tailY);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // ── ANIMATION LOOP ────────────────────────────────────────────────────────
+  let t = 0;
+  function animate() {
+    requestAnimationFrame(animate);
+    t++;
+
+    mx += (tmx - mx) * 0.05;
+    my += (tmy - my) * 0.05;
+
+    // Deep space background gradient
+    ctx.clearRect(0, 0, W, H);
+    const bg = ctx.createRadialGradient(W*0.5, H*0.3, 0, W*0.5, H*0.5, Math.max(W,H)*0.9);
+    bg.addColorStop(0,   '#0a0e1a');
+    bg.addColorStop(0.4, '#060810');
+    bg.addColorStop(1,   '#010204');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // Nebulae first (back layer)
+    nebulae.forEach(n => drawNebula(n, mx, my));
+
+    // Stars
+    stars.forEach(s => drawStar(s, mx, my, t));
+
+    // Planets
+    planets.forEach(p => drawPlanet(p, mx, my, t));
+
+    // Shooting stars
+    shootTimer++;
+    if (shootTimer > 200 + Math.random()*200) { spawnShoot(); shootTimer = 0; }
+    for (let i = shoots.length-1; i >= 0; i--) {
+      drawShoot(shoots[i]);
+      shoots[i].life++;
+      if (shoots[i].life > shoots[i].maxLife) shoots.splice(i, 1);
+    }
+  }
+  animate();
+})();
+
+// ─── SCROLL REVEAL ─────────────────────────────────────────────────────────
+const revealEls = document.querySelectorAll('.reveal');
+const revealObs = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.12 });
+revealEls.forEach(el => revealObs.observe(el));
+
+// ─── SKILL BARS ─────────────────────────────────────────────────────────────
+const skillObs = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const bar = entry.target;
+      const w = bar.dataset.width;
+      setTimeout(() => { bar.style.width = w + '%'; }, 300);
+      skillObs.unobserve(bar);
+    }
+  });
+}, { threshold: 0.5 });
+document.querySelectorAll('.skill-fill').forEach(bar => skillObs.observe(bar));
+
+// ─── 3D CARD TILT ─────────────────────────────────────────────────────────
+document.querySelectorAll('.project-card, .skill-card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const rect = card.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = (e.clientX - cx) / (rect.width / 2);
+    const dy = (e.clientY - cy) / (rect.height / 2);
+    card.style.transform = `perspective(800px) rotateX(${-dy * 6}deg) rotateY(${dx * 6}deg) translateY(-6px) scale(1.02)`;
+  });
+  card.addEventListener('mouseleave', () => {
+    card.style.transform = '';
+  });
+});
+
+// ─── PROJECT FILTER ─────────────────────────────────────────────────────────
+function filterProjects(type, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.project-card').forEach(card => {
+    card.classList.toggle('hidden', type !== 'all' && card.dataset.type !== type);
+  });
+}
+
+// ─── CONTACT FORM ──────────────────────────────────────────────────────────
+async function submitForm(btn) {
+  const name  = document.getElementById('fname').value.trim();
+  const email = document.getElementById('femail').value.trim();
+  const msg   = document.getElementById('fmsg').value.trim();
+  if (!name || !email || !msg) { alert('Please fill in all fields.'); return; }
+  btn.textContent = 'Sending...'; btn.disabled = true;
+  try {
+    const res = await fetch('https://formspree.io/f/mnjwgywy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ name, email, message: msg })
+    });
+    if (res.ok) {
+      document.getElementById('contactFormInner').style.display = 'none';
+      document.getElementById('formSuccess').style.display = 'block';
+    } else { btn.textContent = 'Send Message →'; btn.disabled = false; alert('Something went wrong. Try again.'); }
+  } catch { btn.textContent = 'Send Message →'; btn.disabled = false; alert('Network error. Try again.'); }
+}
+
+// ─── VIDEO MODAL ───────────────────────────────────────────────────────────
+const videoLinks = {
+  'FRFyDImt99I':'https://www.youtube.com/watch?v=FRFyDImt99I',
+  'Yq-1w3UqhtY':'https://youtu.be/Yq-1w3UqhtY',
+  'sZHA0hxcRAU':'https://youtu.be/sZHA0hxcRAU',
+  'Jqo5DDAzFZ8':'https://youtu.be/Jqo5DDAzFZ8',
+  'Uoo4Lt_wDQo':'https://youtu.be/Uoo4Lt_wDQo'
+};
+
+function openVideo(videoId, title) {
+  document.getElementById('modalTitle').textContent = title + ' — Demo';
+  document.getElementById('modalIframe').src = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&rel=0';
+  document.getElementById('modalYTLink').href = videoLinks[videoId] || '#';
+  document.getElementById('embedWrapper').style.display = 'block';
+  document.getElementById('fallbackMsg').style.display = 'none';
+  document.getElementById('videoModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => {
+    try { const f = document.getElementById('modalIframe'); if (f.contentDocument !== null && f.contentDocument.body.innerHTML === '') showFallback(); } catch(e) {}
+  }, 2500);
+}
+function showFallback() { document.getElementById('embedWrapper').style.display = 'none'; document.getElementById('fallbackMsg').style.display = 'flex'; }
+function closeVideo() { document.getElementById('videoModal').classList.remove('open'); document.getElementById('modalIframe').src = ''; document.getElementById('embedWrapper').style.display = 'block'; document.getElementById('fallbackMsg').style.display = 'none'; document.body.style.overflow = ''; }
+function handleOverlayClick(e) { if (e.target === document.getElementById('videoModal')) closeVideo(); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeVideo(); });
+function toggleMenu() { document.getElementById('mobileMenu').classList.toggle('open'); }
+function closeMenu() { document.getElementById('mobileMenu').classList.remove('open'); }
+</script>
+</body>
+</html>
